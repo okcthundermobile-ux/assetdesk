@@ -1,0 +1,13 @@
+version: v1
+runConfig:
+  runCommand: node server.js
+  outputFiles:
+    serverApp:
+      include:
+        - build
+        - server.js
+metadata:
+  adapterPackageName: "@assetdesk/apphosting-adapter"
+  adapterVersion: "1.0.0"
+  framework: "create-react-app"
+  frameworkVersion: "5.0.1"

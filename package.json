@@ -2,6 +2,9 @@
   "name": "thunder-innovations-asset-desk",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "firebase": "^12.18.0",
     "react": "^18.3.1",
