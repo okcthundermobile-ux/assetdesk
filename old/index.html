@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Asset Activation Dashboard — OKC Thunder</title>
+<link rel="stylesheet" href="style.css">
+<script src="script.js"></script>
+</head>
+<body class="role-cp">
+
+<header>
+  <div class="logo-area">
+    <div class="bolt">⚡</div>
+    <div>
+      <div class="app-name">Asset Activation Dashboard</div>
+      <div class="app-sub">OKC Thunder · Paycom Center · 2025–26 Season &nbsp;<span style="color:var(--gold);font-weight:700;font-size:10px;letter-spacing:.3px">⚡ Thunder Innovations · Powered by Google</span></div>
+    </div>
+  </div>
+  <div class="role-area">
+    <span class="role-label">Viewing as:</span>
+    <div class="role-sw">
+      <button class="role-btn active" onclick="setRole('cp',this)">Corp Partnerships</button>
+      <button class="role-btn" onclick="setRole('fan',this)">Fan Dev</button>
+      <button class="role-btn" onclick="setRole('act',this)">Activations</button>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" onclick="setTab('cal',this)">📅&nbsp; Game Calendar</button>
+  <button class="tab" onclick="setTab('heat',this)">🗺️&nbsp; Arena Heatmap</button>
+  <button class="tab" onclick="setTab('kpi',this)">📊&nbsp; Reports &amp; KPIs</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- CALENDAR PANEL -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="panel-cal" class="panel active">
+  <div class="cal-wrap">
+    <div>
+      <div class="cal-box">
+        <div class="cal-nav">
+          <div class="cal-month-lbl" id="cal-label">November 2025</div>
+          <div class="nav-btns">
+            <button class="nav-btn" onclick="shiftMonth(-1)">‹</button>
+            <button class="nav-btn" onclick="shiftMonth(1)">›</button>
+          </div>
+        </div>
+        <div class="dow-row">
+          <div class="dow">SUN</div><div class="dow">MON</div><div class="dow">TUE</div>
+          <div class="dow">WED</div><div class="dow">THU</div><div class="dow">FRI</div><div class="dow">SAT</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="legend-row" id="cal-legend"></div>
+      </div>
+    </div>
+    <div>
+      <div class="detail-box">
+        <div class="detail-empty" id="detail-empty">← Click a game to see activation details</div>
+        <div id="detail-content" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- HEATMAP PANEL -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="panel-heat" class="panel">
+  <div class="heatmap-wrap">
+    <div>
+      <div class="arena-box">
+        <div class="arena-title sec-title">Paycom Center — Asset Zone Map</div>
+        <svg id="arena-svg" viewBox="0 0 700 500" style="width:100%;max-width:680px;height:auto" xmlns="http://www.w3.org/2000/svg">
+          <!-- Arena bowl outer -->
+          <ellipse cx="350" cy="250" rx="330" ry="235" fill="#E2E8F0" stroke="#CBD5E1" stroke-width="2"/>
+          <!-- Concourse ring -->
+          <ellipse cx="350" cy="250" rx="285" ry="197" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1"/>
+          <!-- Seating bowl -->
+          <ellipse cx="350" cy="250" rx="245" ry="168" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1.5"/>
+          <!-- Court -->
+          <rect x="178" y="165" width="344" height="170" rx="8" fill="#FFF7ED" stroke="#F97316" stroke-width="1.5"/>
+          <!-- Court center circle -->
+          <circle cx="350" cy="250" r="30" fill="none" stroke="#EF3B24" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <!-- Paint areas -->
+          <rect x="178" y="195" width="68" height="110" rx="4" fill="rgba(0,125,197,0.12)" stroke="#007DC5" stroke-width="1"/>
+          <rect x="454" y="195" width="68" height="110" rx="4" fill="rgba(0,125,197,0.12)" stroke="#007DC5" stroke-width="1"/>
+          <!-- Thunder logo text at center -->
+          <text x="350" y="247" text-anchor="middle" font-size="11" font-weight="900" fill="#002D62" font-family="sans-serif">OKC</text>
+          <text x="350" y="261" text-anchor="middle" font-size="8" font-weight="700" fill="#EF3B24" font-family="sans-serif">THUNDER</text>
+
+          <!-- ZONE 1: Digital Courtside (Arcadia Pulse) — sideline banners -->
+          <rect id="z0" x="182" y="153" width="336" height="11" rx="4" fill="#4F46E5" opacity=".85" cursor="pointer"
+            onmouseenter="tipZone(event,0)" onmouseleave="hideTip()" onclick="hlZone(0)"/>
+          <rect id="z0b" x="182" y="336" width="336" height="11" rx="4" fill="#4F46E5" opacity=".85" cursor="pointer"
+            onmouseenter="tipZone(event,0)" onmouseleave="hideTip()" onclick="hlZone(0)"/>
+          <text x="350" y="148" text-anchor="middle" font-size="8" fill="#4F46E5" font-weight="700">DIGITAL COURTSIDE</text>
+
+          <!-- ZONE 2: LED Board (Bluejay Canyon) — ring around seating bowl -->
+          <rect id="z1" x="107" y="82" width="18" height="336" rx="5" fill="#0284C7" opacity=".8" cursor="pointer"
+            onmouseenter="tipZone(event,1)" onmouseleave="hideTip()" onclick="hlZone(1)"/>
+          <rect id="z1b" x="575" y="82" width="18" height="336" rx="5" fill="#0284C7" opacity=".8" cursor="pointer"
+            onmouseenter="tipZone(event,1)" onmouseleave="hideTip()" onclick="hlZone(1)"/>
+          <text x="96" y="254" text-anchor="middle" font-size="8" fill="#0284C7" font-weight="700" transform="rotate(-90,96,254)">LED BOARD</text>
+
+          <!-- ZONE 3: Concourse Wedge (Cobalt Prairie) — concourse sections -->
+          <rect id="z2" x="113" y="425" width="100" height="32" rx="6" fill="#059669" opacity=".85" cursor="pointer"
+            onmouseenter="tipZone(event,2)" onmouseleave="hideTip()" onclick="hlZone(2)"/>
+          <rect id="z2b" x="487" y="425" width="100" height="32" rx="6" fill="#059669" opacity=".85" cursor="pointer"
+            onmouseenter="tipZone(event,2)" onmouseleave="hideTip()" onclick="hlZone(2)"/>
+          <text x="163" y="447" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">CONCOURSE WEDGE</text>
+          <text x="537" y="447" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">CONCOURSE WEDGE</text>
+
+          <!-- ZONE 4: Mobile Banner (Elevate Oak) — scoreboard areas -->
+          <rect id="z3" x="300" y="52" width="100" height="24" rx="5" fill="#D97706" opacity=".85" cursor="pointer"
+            onmouseenter="tipZone(event,3)" onmouseleave="hideTip()" onclick="hlZone(3)"/>
+          <text x="350" y="68" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">MOBILE BANNER / SCOREBOARD</text>
+
+          <!-- ZONE 5: Website Takeover (Flint Creek) — digital display corners -->
+          <rect id="z4" x="130" y="52" width="80" height="22" rx="5" fill="#DC2626" opacity=".8" cursor="pointer"
+            onmouseenter="tipZone(event,4)" onmouseleave="hideTip()" onclick="hlZone(4)"/>
+          <rect id="z4b" x="490" y="52" width="80" height="22" rx="5" fill="#DC2626" opacity=".8" cursor="pointer"
+            onmouseenter="tipZone(event,4)" onmouseleave="hideTip()" onclick="hlZone(4)"/>
+          <text x="170" y="67" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">WEB / DIGITAL</text>
+          <text x="530" y="67" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">WEB / DIGITAL</text>
+
+          <!-- ZONE 6: Jersey Patch (Golden Hour Health) — center court -->
+          <circle id="z5" cx="350" cy="250" r="26" fill="#7C3AED" opacity=".2" cursor="pointer"
+            onmouseenter="tipZone(event,5)" onmouseleave="hideTip()" onclick="hlZone(5)"/>
+          <circle cx="350" cy="250" r="26" fill="none" stroke="#7C3AED" stroke-width="2.5" stroke-dasharray="5,3" cursor="pointer"
+            onmouseenter="tipZone(event,5)" onmouseleave="hideTip()" onclick="hlZone(5)"/>
+          <text x="350" y="288" text-anchor="middle" font-size="8" fill="#7C3AED" font-weight="700">JERSEY PATCH</text>
+
+          <!-- ZONE 7: Basket Stanchion (Horizon Kite) — basket areas -->
+          <circle id="z6" cx="213" cy="250" r="16" fill="#0891B2" opacity=".85" cursor="pointer"
+            onmouseenter="tipZone(event,6)" onmouseleave="hideTip()" onclick="hlZone(6)"/>
+          <circle id="z6b" cx="487" cy="250" r="16" fill="#0891B2" opacity=".85" cursor="pointer"
+            onmouseenter="tipZone(event,6)" onmouseleave="hideTip()" onclick="hlZone(6)"/>
+          <text x="213" y="278" text-anchor="middle" font-size="8" fill="#0891B2" font-weight="700">STANCHION</text>
+          <text x="487" y="278" text-anchor="middle" font-size="8" fill="#0891B2" font-weight="700">STANCHION</text>
+
+          <!-- Compass / orientation -->
+          <text x="660" y="490" text-anchor="end" font-size="9" fill="#94A3B8">PAYCOM CENTER · OKC · SECTION VIEW</text>
+        </svg>
+        <div class="arena-note">Click any zone to highlight details. Hover for quick KPI preview.</div>
+      </div>
+    </div>
+    <div>
+      <div class="zone-panel">
+        <div class="zone-title">Partner Zones</div>
+        <div id="zone-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- KPI PANEL -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="panel-kpi" class="panel">
+  <div class="kpi-wrap">
+    <div class="kpi-left">
+      <div class="sec-title" style="margin-bottom:14px">Partner KPI Report</div>
+      <div class="partner-tabs" id="partner-tabs"></div>
+
+      <!-- CP view -->
+      <div class="cp-view">
+        <div class="metric-grid" id="cp-metrics"></div>
+        <div class="chart-box">
+          <div class="chart-title">QI Media Value vs. Sponsorship Impressions</div>
+          <div id="cp-chart"></div>
+        </div>
+        <div class="tbl-box">
+          <div class="tbl-head"><div class="tbl-title">In-Bowl Signage — Nielsen Report</div></div>
+          <table id="nielsen-tbl"></table>
+        </div>
+      </div>
+
+      <!-- Fan Dev view -->
+      <div class="fan-view">
+        <div class="role-note">📣 Fan Dev View — engagement & sweepstakes data only</div>
+        <div class="fan-grid" id="fan-metrics"></div>
+        <div class="tbl-box">
+          <div class="tbl-head"><div class="tbl-title">Social Media Breakdown</div></div>
+          <table id="social-tbl"></table>
+        </div>
+      </div>
+
+      <!-- Activations view -->
+      <div class="act-view">
+        <div class="role-note">🛠 Activations View — deployment logs &amp; asset timing</div>
+        <div class="metric-grid" id="act-metrics"></div>
+        <div class="tbl-box">
+          <div class="tbl-head"><div class="tbl-title">Asset Deployment Log</div></div>
+          <table id="deploy-tbl"></table>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-right">
+      <div class="sec-title" style="margin-bottom:14px">Season Overview — All Partners</div>
+      <!-- Always-visible cross-partner comparison -->
+      <div class="all-partners-chart">
+        <div class="apc-title">QI Media Value by Partner ($)</div>
+        <div id="all-qi-chart" style="margin-bottom:20px"></div>
+        <div class="apc-title">Total Social Impressions by Partner</div>
+        <div id="all-social-chart"></div>
+      </div>
+      <div style="height:16px"></div>
+      <div class="tbl-box">
+        <div class="tbl-head"><div class="tbl-title">Partner Summary — Season Totals</div></div>
+        <table id="summary-tbl"></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tip" id="tip"></div>
+
+
+<script>
+// ═══════════════════════════ INIT ═══════════════════════════
+renderCalendar();
+renderZoneList();
+buildPartnerTabs();
+renderKPI();
+</script>
+</body>
+</html>
