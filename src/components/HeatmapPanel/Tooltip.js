@@ -13,8 +13,8 @@ export default function Tooltip({ tipData }) {
         top: tipData.y + 'px'
       }}
     >
-      <strong>{tipData.partnerName}</strong><br/>
-      {tipData.asset}<br/>
+      <strong>{tipData.assetLabel}</strong><br/>
+      Assigned: {tipData.partnerName}<br/>
       QI: {fmt$(tipData.qi)}<br/>
       {fmtN(tipData.imp)} impressions
     </div>

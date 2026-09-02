@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getGames, getPartners, getKPIs, getActivations, firebaseReady } from '../../data/firebase';
 
 const DEMO_STORAGE_KEY = 'thunder-demo-deployments';
+const CUSTOM_METRICS_STORAGE_KEY = 'thunder-dashboard-custom-metrics';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -16,6 +17,9 @@ export default function HomePanel() {
   const [partners, setPartners] = useState([]);
   const [kpis, setKpis] = useState({});
   const [deployments, setDeployments] = useState([]);
+  const [customMetrics, setCustomMetrics] = useState([]);
+  const [addingMetric, setAddingMetric] = useState(false);
+  const [metricDraft, setMetricDraft] = useState({ label: '', value: '', subtitle: '' });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,10 +36,35 @@ export default function HomePanel() {
       setPartners(pData);
       setKpis(kData);
       setDeployments(Array.isArray(aData) ? aData : []);
+      setCustomMetrics(JSON.parse(localStorage.getItem(CUSTOM_METRICS_STORAGE_KEY) || '[]'));
       setLoading(false);
     }
     loadData();
   }, []);
+
+  const updateMetricDraft = (field) => (e) => {
+    const value = e.target.value;
+    setMetricDraft(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleAddMetric = () => {
+    const label = metricDraft.label.trim();
+    const value = metricDraft.value.trim();
+    const subtitle = metricDraft.subtitle.trim();
+    if (!label || !value) return;
+
+    const next = [{ id: `metric-${Date.now()}`, label, value, subtitle }, ...customMetrics];
+    setCustomMetrics(next);
+    localStorage.setItem(CUSTOM_METRICS_STORAGE_KEY, JSON.stringify(next));
+    setMetricDraft({ label: '', value: '', subtitle: '' });
+    setAddingMetric(false);
+  };
+
+  const removeMetric = (metricId) => {
+    const next = customMetrics.filter(m => m.id !== metricId);
+    setCustomMetrics(next);
+    localStorage.setItem(CUSTOM_METRICS_STORAGE_KEY, JSON.stringify(next));
+  };
 
   const upcoming = useMemo(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -74,6 +103,29 @@ export default function HomePanel() {
           <div className="m-lbl">Deployments</div>
           <div className="m-val">{deployments.length}</div>
           <div className="m-sub">Planned activations</div>
+        </div>
+        {customMetrics.map(metric => (
+          <div className="m-card m-card--custom" key={metric.id}>
+            <button type="button" className="custom-metric-remove" onClick={() => removeMetric(metric.id)} aria-label={`Remove ${metric.label}`}>×</button>
+            <div className="m-lbl">{metric.label}</div>
+            <div className="m-val">{metric.value}</div>
+            {metric.subtitle && <div className="m-sub">{metric.subtitle}</div>}
+          </div>
+        ))}
+        <div className="m-card m-card--add">
+          {!addingMetric ? (
+            <button type="button" className="custom-metric-add-btn" onClick={() => setAddingMetric(true)}>+ Add metric</button>
+          ) : (
+            <div className="custom-metric-form">
+              <input className="form-input" type="text" value={metricDraft.label} onChange={updateMetricDraft('label')} placeholder="Metric label" />
+              <input className="form-input" type="text" value={metricDraft.value} onChange={updateMetricDraft('value')} placeholder="Metric value" />
+              <input className="form-input" type="text" value={metricDraft.subtitle} onChange={updateMetricDraft('subtitle')} placeholder="Optional note" />
+              <div className="custom-metric-actions">
+                <button type="button" className="deploy-submit" onClick={handleAddMetric}>Save</button>
+                <button type="button" className="deploy-cancel" onClick={() => { setAddingMetric(false); setMetricDraft({ label: '', value: '', subtitle: '' }); }}>Cancel</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

@@ -4,6 +4,21 @@ import { getFirestore, collection, doc, getDocs, getDoc, setDoc, addDoc, updateD
 import { getAuth } from 'firebase/auth';
 import { PARTNERS, KPI, GAMES } from './mockData';
 
+const LOCAL_PARTNERS_KEY = 'thunder-local-partners';
+
+function loadLocalPartners() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(LOCAL_PARTNERS_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalPartners(partners) {
+  localStorage.setItem(LOCAL_PARTNERS_KEY, JSON.stringify(partners));
+}
+
 const requiredEnvKeys = [
   'REACT_APP_API_KEY',
   'REACT_APP_AUTH_DOMAIN',
@@ -46,7 +61,7 @@ export { app, db, auth };
  */
 export const getPartners = async (partnerID = null) => {
   if (!db) {
-    const partners = [...PARTNERS];
+    const partners = [...PARTNERS, ...loadLocalPartners()];
     partners.sort((a, b) => String(a.id).localeCompare(String(b.id)));
     return partnerID ? partners.filter(p => String(p.id) === String(partnerID)) : partners;
   }
@@ -57,8 +72,10 @@ export const getPartners = async (partnerID = null) => {
   }
   const snap = await getDocs(collection(db, 'partners'));
   const partners = snap.docs.map(d => d.data());
-  partners.sort((a, b) => String(a.id).localeCompare(String(b.id)));
-  return partners;
+  const merged = [...partners, ...loadLocalPartners()];
+  const deduped = Array.from(new Map(merged.map(p => [String(p.id), p])).values());
+  deduped.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+  return deduped;
 };
 
 /**
@@ -209,6 +226,13 @@ export const createUserProfile = async (uid, data) => {
  * @param {Object} partner  Must include an `id` field
  */
 export const addPartner = async (partner) => {
+  if (!db) {
+    const existing = loadLocalPartners();
+    const normalized = { ...partner, id: String(partner.id) };
+    const next = [...existing.filter(p => String(p.id) !== String(normalized.id)), normalized];
+    saveLocalPartners(next);
+    return;
+  }
   await setDoc(doc(db, 'partners', String(partner.id)), partner);
 };
 

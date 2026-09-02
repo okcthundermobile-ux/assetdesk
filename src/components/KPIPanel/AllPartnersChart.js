@@ -15,7 +15,7 @@ export default function AllPartnersChart({ PARTNERS, KPI }) {
         <div className="apc-title">QI Media Value by Partner ($)</div>
         <div id="all-qi-chart" style={{ marginBottom: '20px' }}>
           {PARTNERS.map(p => {
-            const k = KPI[p.id];
+            const k = KPI[p.id] || { qi: 0 };
             const pct = Math.round(k.qi / maxQI * 100);
             return (
               <div key={`qi-${p.id}`} className="bar-row">
@@ -32,7 +32,7 @@ export default function AllPartnersChart({ PARTNERS, KPI }) {
         <div className="apc-title">Total Social Impressions by Partner</div>
         <div id="all-social-chart">
           {PARTNERS.map(p => {
-            const k = KPI[p.id];
+            const k = KPI[p.id] || { socialImp: 0 };
             const pct = Math.round(k.socialImp / maxSoc * 100);
             return (
               <div key={`soc-${p.id}`} className="bar-row">
@@ -59,7 +59,7 @@ export default function AllPartnersChart({ PARTNERS, KPI }) {
           </thead>
           <tbody>
             {PARTNERS.map(p => {
-              const k = KPI[p.id];
+              const k = KPI[p.id] || { qi: 0, imp: 0, ctr: 0, eng: 0 };
               return (
                 <tr key={p.id}>
                   <td>

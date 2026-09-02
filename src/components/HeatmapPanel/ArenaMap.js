@@ -75,7 +75,10 @@ const ICONS = {
 
 export default function ArenaMap({ partners, hlZoneIdx, onSelectZone, onHover, query = '' }) {
   const q = query.trim().toLowerCase();
-  const matches = p => !q || p.name.toLowerCase().includes(q) || p.asset.toLowerCase().includes(q);
+  const matches = (p, marker) => !q
+    || p.name.toLowerCase().includes(q)
+    || p.asset.toLowerCase().includes(q)
+    || marker.label.toLowerCase().includes(q);
 
   return (
     <div className="arena-map">
@@ -89,21 +92,22 @@ export default function ArenaMap({ partners, hlZoneIdx, onSelectZone, onHover, q
         const p = partners[i];
         if (!p) return null;
         const active = hlZoneIdx === i;
-        const dim = !matches(p);
+        const dim = !matches(p, m);
         return (
           <button
             key={i}
             type="button"
             className={`arena-marker arena-marker--${m.type}${active ? ' active' : ''}${dim ? ' dim' : ''}`}
-            style={{ left: `${m.x}%`, top: `${m.y}%`, background: p.color }}
-            title={`${p.name} — ${m.label}`}
-            aria-label={`${p.name} — ${m.label}`}
-            onClick={() => onSelectZone(i)}
-            onMouseEnter={(e) => onHover(e, i)}
+            style={{ left: `${m.x}%`, top: `${m.y}%` }}
+            title={`${m.label} — Assigned: ${p.name}`}
+            aria-label={`${m.label} — Assigned: ${p.name}`}
+            onClick={() => onSelectZone(i, m)}
+            onMouseEnter={(e) => onHover(e, i, m)}
             onMouseLeave={() => onHover(null, -1)}
           >
+            <span className="arena-marker-code">A{i + 1}</span>
             {ICONS[m.type]}
-            <span className="arena-marker-pulse" style={{ borderColor: p.color }} />
+            <span className="arena-marker-pulse" />
           </button>
         );
       })}

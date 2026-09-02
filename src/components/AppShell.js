@@ -2,7 +2,19 @@ import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useRole } from '../context/RoleContext';
+import { getGames } from '../data/firebase';
 import BrandLogo from './BrandLogo';
+import GameDatePicker from './shared/GameDatePicker';
+
+const OWNER_NOTIFICATIONS_KEY = 'thunder-owner-notifications';
+
+function loadOwnerNotifications() {
+  try {
+    return JSON.parse(localStorage.getItem(OWNER_NOTIFICATIONS_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
 
 const stroke = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round' };
 
@@ -78,16 +90,39 @@ export default function AppShell() {
   const page = TITLES[location.pathname] || TITLES['/'];
 
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [ownerNotifications, setOwnerNotifications] = useState([]);
+  const [games, setGames] = useState([]);
   const profileRef = useRef(null);
+  const notificationsRef = useRef(null);
 
   useEffect(() => {
+    const refreshNotifications = () => setOwnerNotifications(loadOwnerNotifications());
+
+    refreshNotifications();
+    window.addEventListener('owner-notifications-updated', refreshNotifications);
+    window.addEventListener('storage', refreshNotifications);
+
     const onDocClick = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
         setProfileOpen(false);
       }
+      if (notificationsRef.current && !notificationsRef.current.contains(e.target)) {
+        setNotificationsOpen(false);
+      }
     };
     document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      window.removeEventListener('owner-notifications-updated', refreshNotifications);
+      window.removeEventListener('storage', refreshNotifications);
+    };
+  }, []);
+
+  useEffect(() => {
+    getGames().then(setGames).catch((err) => {
+      console.error('Could not load games for the report picker:', err);
+    });
   }, []);
 
   const handleLogout = async () => {
@@ -100,6 +135,45 @@ export default function AppShell() {
   };
 
   const displayName = userProfile?.displayName || currentUser?.email?.split('@')[0] || 'User';
+  const unreadCount = ownerNotifications.filter(n => !n.read).length;
+  const reportType = new URLSearchParams(location.search).get('reportType') === 'partner' ? 'partner' : 'game';
+
+  const buildNavTarget = (basePath) => {
+    const params = new URLSearchParams(location.search);
+    const gameDate = params.get('gameDate');
+    const partnerId = params.get('partnerId');
+    const next = new URLSearchParams();
+
+    if (gameDate && ['/schedule', '/arena', '/reports', '/deployments'].includes(basePath)) {
+      next.set('gameDate', gameDate);
+    }
+    if (partnerId && ['/arena', '/reports'].includes(basePath)) {
+      next.set('partnerId', partnerId);
+    }
+
+    const qs = next.toString();
+    return qs ? `${basePath}?${qs}` : basePath;
+  };
+
+  const markNotificationsAsRead = () => {
+    const next = ownerNotifications.map(n => ({ ...n, read: true }));
+    setOwnerNotifications(next);
+    localStorage.setItem(OWNER_NOTIFICATIONS_KEY, JSON.stringify(next));
+    window.dispatchEvent(new CustomEvent('owner-notifications-updated'));
+  };
+
+  const setReportType = (nextType) => {
+    const next = new URLSearchParams(location.search);
+    next.set('reportType', nextType);
+    navigate(`/reports?${next.toString()}`);
+  };
+
+  const setReportGameDate = (gameDate) => {
+    const next = new URLSearchParams(location.search);
+    next.set('gameDate', gameDate);
+    next.set('reportType', 'game');
+    navigate(`/reports?${next.toString()}`);
+  };
 
   return (
     <div className="shell">
@@ -112,7 +186,7 @@ export default function AppShell() {
           {NAV_ITEMS.map(item => (
             <NavLink
               key={item.to}
-              to={item.to}
+              to={buildNavTarget(item.to)}
               end={item.to === '/'}
               title={item.label}
               aria-label={item.label}
@@ -132,13 +206,75 @@ export default function AppShell() {
         <header className="shell-topbar">
           <div className="shell-topbar-left">
             <span className="shell-topbar-title">{page.title}</span>
+            {location.pathname === '/reports' && (
+              <div className="seg-control shell-report-tabs" role="tablist" aria-label="Report type">
+                <button
+                  type="button"
+                  className={`seg-btn shell-report-tab${reportType === 'game' ? ' active' : ''}`}
+                  role="tab"
+                  aria-selected={reportType === 'game'}
+                  onClick={() => setReportType('game')}
+                >
+                  Game Report
+                </button>
+                <button
+                  type="button"
+                  className={`seg-btn shell-report-tab${reportType === 'partner' ? ' active' : ''}`}
+                  role="tab"
+                  aria-selected={reportType === 'partner'}
+                  onClick={() => setReportType('partner')}
+                >
+                  Partner KPI Report
+                </button>
+              </div>
+            )}
+            {location.pathname === '/reports' && reportType === 'game' && (
+              <GameDatePicker
+                games={games}
+                value={new URLSearchParams(location.search).get('gameDate') || new Date().toISOString().slice(0, 10)}
+                onChange={setReportGameDate}
+                label="Game report date"
+              />
+            )}
           </div>
 
           <div className="shell-topbar-right">
-            <NavLink to="/deployments" className="shell-create-btn">+ Create</NavLink>
-            <button type="button" className="shell-icon-btn shell-icon-btn--dot" title="Notifications" aria-label="Notifications">
-              {ICONS.bell}
-            </button>
+            <NavLink to={buildNavTarget('/deployments')} className="shell-create-btn">+ Create</NavLink>
+            <div className="notif-menu" ref={notificationsRef}>
+              <button
+                type="button"
+                className={`shell-icon-btn${unreadCount > 0 ? ' shell-icon-btn--dot' : ''}`}
+                title="Notifications"
+                aria-label="Notifications"
+                onClick={() => setNotificationsOpen(o => !o)}
+              >
+                {ICONS.bell}
+                {unreadCount > 0 && <span className="notif-count">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+              </button>
+              {notificationsOpen && (
+                <div className="notif-dropdown" role="menu">
+                  <div className="notif-head">
+                    <span>Owner Notifications</span>
+                    {unreadCount > 0 && (
+                      <button type="button" className="notif-mark-btn" onClick={markNotificationsAsRead}>
+                        Mark all read
+                      </button>
+                    )}
+                  </div>
+                  {ownerNotifications.length === 0 ? (
+                    <div className="notif-empty">No owner notifications yet.</div>
+                  ) : (
+                    ownerNotifications.slice(0, 8).map(n => (
+                      <div key={n.id} className={`notif-item${n.read ? '' : ' unread'}`}>
+                        <div className="notif-owner">{n.owner}</div>
+                        <div className="notif-text">{n.assetName} · {n.sponsorName}</div>
+                        <div className="notif-date">Game Date: {n.gameDate}</div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
 
             {currentUser && (
               <div className="profile-menu" ref={profileRef}>

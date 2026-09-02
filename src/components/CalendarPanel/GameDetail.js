@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useRole } from '../../context/RoleContext';
 
 export default function GameDetail({ selGame, PARTNERS, KPI, DEPLOYMENTS = [], onClose }) {
@@ -12,6 +13,12 @@ export default function GameDetail({ selGame, PARTNERS, KPI, DEPLOYMENTS = [], o
 
   const fmt$ = n => '$' + n.toLocaleString('en-US');
   const fmtN = n => n.toLocaleString('en-US');
+  const partnerLabel = (deployment) => {
+    if (Array.isArray(deployment.partnerNames) && deployment.partnerNames.length > 0) {
+      return deployment.partnerNames.join(', ');
+    }
+    return deployment.partnerName || deployment.Partner_ID;
+  };
 
   return (
     <div className="detail-overlay" onClick={onClose}>
@@ -25,6 +32,10 @@ export default function GameDetail({ selGame, PARTNERS, KPI, DEPLOYMENTS = [], o
           <button type="button" className="detail-close" onClick={onClose} aria-label="Close details">✕</button>
         )}
       </div>
+      <div className="detail-tab-links">
+        <Link to={`/arena?gameDate=${selGame.d}`} className="detail-tab-link">Open Map for this game</Link>
+        <Link to={`/reports?gameDate=${selGame.d}`} className="detail-tab-link">Open Reports for this game</Link>
+      </div>
       <div className="detail-scroll">
         <div className="detail-body">
           {DEPLOYMENTS.length > 0 && (
@@ -34,7 +45,7 @@ export default function GameDetail({ selGame, PARTNERS, KPI, DEPLOYMENTS = [], o
                 <div key={d.id ?? `${d.Partner_ID}-${d.Game_Date}`} className="act-item">
                   <div className="act-avatar" style={{ background: 'var(--navy)' }}>🚀</div>
                   <div>
-                    <div className="act-name">{d.Asset_Name} — {d.partnerName || d.Partner_ID}</div>
+                    <div className="act-name">{d.Asset_Name} — {partnerLabel(d)}</div>
                     <div className="act-metric">
                       Status: {d.status} · Owner: {d.owner}
                     </div>

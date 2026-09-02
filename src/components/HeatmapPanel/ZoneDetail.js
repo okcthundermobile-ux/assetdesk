@@ -8,7 +8,7 @@ const fmtDate = dstr => {
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 };
 
-export default function ZoneDetail({ partner, partnerIdx, kpi, games, onClose }) {
+export default function ZoneDetail({ partner, partnerIdx, assetLabel, kpi, games, onClose }) {
   if (!partner) return null;
 
   const today = new Date().toISOString().slice(0, 10);
@@ -24,8 +24,8 @@ export default function ZoneDetail({ partner, partnerIdx, kpi, games, onClose })
       <div className="detail-box detail-box--modal" onClick={e => e.stopPropagation()}>
         <div className="detail-header">
           <div>
-            <div className="detail-opp">{partner.name}</div>
-            <div className="detail-date">📍 {partner.asset} · {partner.industry}</div>
+            <div className="detail-opp">{assetLabel}</div>
+            <div className="detail-date">Assigned Partner: {partner.name} · {partner.industry}</div>
           </div>
           <button type="button" className="detail-close" onClick={onClose} aria-label="Close details">✕</button>
         </div>
