@@ -108,8 +108,9 @@ export default function HeatmapPanel() {
   };
 
   const shownDeployments = useMemo(() => {
-    if (showAllDeployments) return deployments;
-    return deployments.filter(d => d.Game_Date === linkedGameDate);
+    const assetDeployments = deployments.filter(d => d.deploymentType !== 'campaign');
+    if (showAllDeployments) return assetDeployments;
+    return assetDeployments.filter(d => d.Game_Date === linkedGameDate);
   }, [deployments, linkedGameDate, showAllDeployments]);
 
   if (partners.length === 0) return <div>Loading...</div>;
@@ -137,7 +138,7 @@ export default function HeatmapPanel() {
                 checked={showAllDeployments}
                 onChange={(e) => setShowAllDeployments(e.target.checked)}
               />
-              <span>All deployments (all dates)</span>
+              <span>All asset deployments (all dates)</span>
             </label>
           </div>
           <ArenaMap
@@ -151,7 +152,7 @@ export default function HeatmapPanel() {
           <div className="tbl-box" style={{ marginTop: 14 }}>
             <div className="tbl-head">
               <div className="tbl-title">
-                {showAllDeployments ? `All Deployments Across All Dates (${shownDeployments.length})` : `Deployments on ${linkedGameDate} (${shownDeployments.length})`}
+                {showAllDeployments ? `All Asset Deployments Across All Dates (${shownDeployments.length})` : `Asset Deployments on ${linkedGameDate} (${shownDeployments.length})`}
               </div>
             </div>
             <table>
@@ -196,6 +197,7 @@ export default function HeatmapPanel() {
           assetLabel={selAssetLabel || partners[selZoneIdx]?.asset}
           kpi={kpis[partners[selZoneIdx].id]}
           games={games}
+          linkedGameDate={linkedGameDate}
           onClose={() => setSelZoneIdx(-1)}
         />
       )}

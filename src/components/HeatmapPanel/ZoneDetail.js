@@ -8,16 +8,11 @@ const fmtDate = dstr => {
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 };
 
-export default function ZoneDetail({ partner, partnerIdx, assetLabel, kpi, games, onClose }) {
+export default function ZoneDetail({ partner, partnerIdx, assetLabel, kpi, games, linkedGameDate, onClose }) {
   if (!partner) return null;
 
-  const today = new Date().toISOString().slice(0, 10);
-  const all = games.filter(g => g.ps.includes(partnerIdx));
-  const upcoming = all.filter(g => g.d >= today);
-  const past = all.filter(g => g.d < today);
-  // Off-season (demo data): fall back to showing the full season slate.
-  const shown = upcoming.length > 0 ? upcoming : all;
-  const shownLabel = upcoming.length > 0 ? 'Upcoming Activations' : 'Season Activations';
+  const selectedGame = games.find(g => g.d === linkedGameDate) || null;
+  const activeForSelectedGame = selectedGame?.ps.includes(partnerIdx);
 
   return (
     <div className="detail-overlay" onClick={onClose}>
@@ -49,24 +44,21 @@ export default function ZoneDetail({ partner, partnerIdx, assetLabel, kpi, games
             )}
 
             <div className="sec-title" style={{ marginBottom: '10px' }}>
-              {shownLabel} ({shown.length})
+              Deployment for Selected Game
             </div>
-            {shown.length === 0 && (
-              <div className="act-metric" style={{ marginBottom: 10 }}>No home games scheduled for this partner.</div>
+            {!selectedGame && (
+              <div className="act-metric" style={{ marginBottom: 10 }}>Choose a scheduled game date to view this asset's deployment.</div>
             )}
-            {shown.map(g => (
-              <div key={g.d} className="act-item">
+            {selectedGame && !activeForSelectedGame && (
+              <div className="act-metric" style={{ marginBottom: 10 }}>This asset is not scheduled for the selected game.</div>
+            )}
+            {selectedGame && activeForSelectedGame && (
+              <div className="act-item">
                 <div className="act-avatar" style={{ background: partner.color }}>🏀</div>
                 <div>
-                  <div className="act-name">vs. {g.opp}</div>
-                  <div className="act-metric">{fmtDate(g.d)} · Paycom Center · 7:00 PM CT</div>
+                  <div className="act-name">vs. {selectedGame.opp}</div>
+                  <div className="act-metric">{fmtDate(selectedGame.d)} · Paycom Center · 7:00 PM CT</div>
                 </div>
-              </div>
-            ))}
-
-            {past.length > 0 && upcoming.length > 0 && (
-              <div className="act-metric" style={{ marginTop: 10 }}>
-                + {past.length} completed activation{past.length === 1 ? '' : 's'} earlier this season
               </div>
             )}
           </div>
