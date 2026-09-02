@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import ArenaMap from './ArenaMap';
 import Tooltip from './Tooltip';
 import ZoneDetail from './ZoneDetail';
-import { getPartners, getKPIs, getGames, getActivations, firebaseReady } from '../../data/firebase';
+import { getPartners, getGames, getActivations, firebaseReady } from '../../data/firebase';
 
 const DEMO_STORAGE_KEY = 'thunder-demo-deployments';
 const TODAY_ISO = new Date().toISOString().slice(0, 10);
@@ -20,7 +20,6 @@ function loadDemoDeployments() {
 export default function HeatmapPanel() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [partners, setPartners] = useState([]);
-  const [kpis, setKpis] = useState({});
   const [games, setGames] = useState([]);
   const [deployments, setDeployments] = useState([]);
   const [hlZoneIdx, setHlZoneIdx] = useState(-1);
@@ -29,17 +28,16 @@ export default function HeatmapPanel() {
   const [tipData, setTipData] = useState(null);
   const [query, setQuery] = useState('');
   const [linkedGameDate, setLinkedGameDate] = useState(searchParams.get('gameDate') || TODAY_ISO);
+  const requestedGameDate = searchParams.get('gameDate');
 
   useEffect(() => {
     async function loadData() {
-      const [pData, kData, gData, dData] = await Promise.all([
+      const [pData, gData, dData] = await Promise.all([
         getPartners(),
-        getKPIs(),
         getGames(),
         firebaseReady ? getActivations() : Promise.resolve(loadDemoDeployments()),
       ]);
       setPartners(pData);
-      setKpis(kData);
       setGames(gData);
       setDeployments(Array.isArray(dData) ? dData : []);
     }
@@ -61,6 +59,12 @@ export default function HeatmapPanel() {
   }, [partners, searchParams]);
 
   useEffect(() => {
+    if (!requestedGameDate || searchParams.get('partnerId')) return;
+    setSelZoneIdx(-1);
+    setHlZoneIdx(-1);
+  }, [requestedGameDate, searchParams]);
+
+  useEffect(() => {
     if (searchParams.get('gameDate') || !linkedGameDate) return;
     const next = new URLSearchParams(searchParams);
     next.set('gameDate', linkedGameDate);
@@ -75,14 +79,11 @@ export default function HeatmapPanel() {
     }
     const p = partners[idx];
     if (!p) return;
-    const k = kpis[p.id] || { qi: 0, imp: 0 };
     setTipData({
       x: e.clientX + 12,
       y: e.clientY + 12,
       assetLabel: marker?.label || p.asset,
       partnerName: p.name,
-      qi: k.qi,
-      imp: k.imp
     });
   };
 
@@ -109,8 +110,33 @@ export default function HeatmapPanel() {
   };
 
   const shownDeployments = useMemo(() => {
-    return deployments.filter(d => d.Game_Date === linkedGameDate);
-  }, [deployments, linkedGameDate]);
+    const selectedGame = games.find(g => g.d === linkedGameDate);
+    const recorded = deployments.filter(d => d.Game_Date === linkedGameDate);
+    const recordedPartnerIds = new Set(
+      recorded.flatMap(d => d.Partner_IDs || [d.Partner_ID]).map(String)
+    );
+    const scheduledAssets = (selectedGame?.ps || [])
+      .map(idx => partners[idx])
+      .filter(Boolean)
+      .filter(partner => !recordedPartnerIds.has(String(partner.id)))
+      .map(partner => ({
+        id: `scheduled-${linkedGameDate}-${partner.id}`,
+        Game_Date: linkedGameDate,
+        deploymentType: 'asset',
+        Asset_Name: partner.asset,
+        partnerName: partner.name,
+        status: 'Scheduled',
+      }));
+    return [...recorded, ...scheduledAssets];
+  }, [deployments, games, linkedGameDate, partners]);
+
+  const closeZoneDetail = () => {
+    setSelZoneIdx(-1);
+    setHlZoneIdx(-1);
+    const next = new URLSearchParams(searchParams);
+    next.delete('partnerId');
+    setSearchParams(next, { replace: true });
+  };
 
   if (partners.length === 0) return <div>Loading...</div>;
 
@@ -186,10 +212,9 @@ export default function HeatmapPanel() {
           partner={partners[selZoneIdx]}
           partnerIdx={selZoneIdx}
           assetLabel={selAssetLabel || partners[selZoneIdx]?.asset}
-          kpi={kpis[partners[selZoneIdx].id]}
           games={games}
           linkedGameDate={linkedGameDate}
-          onClose={() => setSelZoneIdx(-1)}
+          onClose={closeZoneDetail}
         />
       )}
     </div>

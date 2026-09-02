@@ -1,8 +1,6 @@
 import React from 'react';
 
 export default function Tooltip({ tipData }) {
-  const fmt$ = n => '$' + n.toLocaleString('en-US');
-  const fmtN = n => n.toLocaleString('en-US');
 
   return (
     <div 
@@ -14,9 +12,7 @@ export default function Tooltip({ tipData }) {
       }}
     >
       <strong>{tipData.assetLabel}</strong><br/>
-      Assigned: {tipData.partnerName}<br/>
-      QI: {fmt$(tipData.qi)}<br/>
-      {fmtN(tipData.imp)} impressions
+      Assigned: {tipData.partnerName}
     </div>
   );
 }

@@ -1,14 +1,11 @@
 import React from 'react';
 
-const fmt$ = n => '$' + n.toLocaleString('en-US');
-const fmtN = n => n.toLocaleString('en-US');
-
 const fmtDate = dstr => {
   const d = new Date(dstr + 'T12:00:00');
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 };
 
-export default function ZoneDetail({ partner, partnerIdx, assetLabel, kpi, games, linkedGameDate, onClose }) {
+export default function ZoneDetail({ partner, partnerIdx, assetLabel, games, linkedGameDate, onClose }) {
   if (!partner) return null;
 
   const selectedGame = games.find(g => g.d === linkedGameDate) || null;
@@ -26,23 +23,6 @@ export default function ZoneDetail({ partner, partnerIdx, assetLabel, kpi, games
         </div>
         <div className="detail-scroll">
           <div className="detail-body">
-            {kpi && (
-              <div className="zone-detail-kpis">
-                <div className="zone-detail-kpi">
-                  <div className="m-lbl">QI Media Value</div>
-                  <div className="m-val" style={{ fontSize: '18px' }}>{fmt$(kpi.qi)}</div>
-                </div>
-                <div className="zone-detail-kpi">
-                  <div className="m-lbl">Impressions</div>
-                  <div className="m-val" style={{ fontSize: '18px' }}>{fmtN(kpi.imp)}</div>
-                </div>
-                <div className="zone-detail-kpi">
-                  <div className="m-lbl">CTR</div>
-                  <div className="m-val" style={{ fontSize: '18px' }}>{kpi.ctr}%</div>
-                </div>
-              </div>
-            )}
-
             <div className="sec-title" style={{ marginBottom: '10px' }}>
               Deployment for Selected Game
             </div>

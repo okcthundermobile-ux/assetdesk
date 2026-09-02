@@ -171,6 +171,7 @@ export default function AppShell() {
   const setActiveGameDate = (gameDate) => {
     const next = new URLSearchParams(location.search);
     next.set('gameDate', gameDate);
+    next.delete('partnerId');
     if (location.pathname === '/reports') next.set('reportType', 'game');
     navigate(`${location.pathname}?${next.toString()}`);
   };
