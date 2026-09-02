@@ -4,7 +4,6 @@ import ArenaMap from './ArenaMap';
 import Tooltip from './Tooltip';
 import ZoneDetail from './ZoneDetail';
 import { getPartners, getKPIs, getGames, getActivations, firebaseReady } from '../../data/firebase';
-import GameDatePicker from '../shared/GameDatePicker';
 
 const DEMO_STORAGE_KEY = 'thunder-demo-deployments';
 const TODAY_ISO = new Date().toISOString().slice(0, 10);
@@ -31,7 +30,6 @@ export default function HeatmapPanel() {
   const [query, setQuery] = useState('');
   const [linkedGameDate, setLinkedGameDate] = useState(searchParams.get('gameDate') || TODAY_ISO);
   const [showAllDeployments, setShowAllDeployments] = useState(false);
-  const [dateNotice, setDateNotice] = useState('');
 
   useEffect(() => {
     async function loadData() {
@@ -71,11 +69,6 @@ export default function HeatmapPanel() {
     setSearchParams(next, { replace: true });
   }, [linkedGameDate, partners, searchParams, selZoneIdx, setSearchParams]);
 
-  const currentGameIdx = useMemo(
-    () => games.findIndex(g => g.d === linkedGameDate),
-    [games, linkedGameDate]
-  );
-
   const handleZoneHover = (e, idx, marker) => {
     if (idx === -1) {
       setTipData(null);
@@ -114,20 +107,6 @@ export default function HeatmapPanel() {
     setSearchParams(next);
   };
 
-  const applyGameDate = (gameDate) => {
-    if (!gameDate) return;
-    if (!games.some(g => g.d === gameDate)) {
-      setDateNotice('Please choose a scheduled game date.');
-      return;
-    }
-    setDateNotice('');
-    setLinkedGameDate(gameDate);
-    const next = new URLSearchParams(searchParams);
-    next.set('gameDate', gameDate);
-    if (partners[selZoneIdx]) next.set('partnerId', String(partners[selZoneIdx].id));
-    setSearchParams(next);
-  };
-
   const shownDeployments = useMemo(() => {
     if (showAllDeployments) return deployments;
     return deployments.filter(d => d.Game_Date === linkedGameDate);
@@ -141,32 +120,6 @@ export default function HeatmapPanel() {
         <div className="arena-box">
           <div className="arena-head">
             <div className="arena-title sec-title" style={{ marginBottom: 0 }}>Paycom Center — Asset Zone Map</div>
-            <div className="kpi-date-switch">
-              <button
-                type="button"
-                className="nav-btn"
-                onClick={() => applyGameDate(games[currentGameIdx - 1]?.d)}
-                disabled={currentGameIdx <= 0}
-                aria-label="Previous game"
-              >
-                ‹
-              </button>
-              <GameDatePicker
-                games={games}
-                value={linkedGameDate}
-                onChange={applyGameDate}
-                label="Game date"
-              />
-              <button
-                type="button"
-                className="nav-btn"
-                onClick={() => applyGameDate(games[currentGameIdx + 1]?.d)}
-                disabled={currentGameIdx < 0 || currentGameIdx >= games.length - 1}
-                aria-label="Next game"
-              >
-                ›
-              </button>
-            </div>
             <div className="panel-search">
               <input
                 type="text"
@@ -187,7 +140,6 @@ export default function HeatmapPanel() {
               <span>All deployments (all dates)</span>
             </label>
           </div>
-          {dateNotice && <div className="deploy-alert deploy-alert--error" role="alert">{dateNotice}</div>}
           <ArenaMap
             partners={partners}
             hlZoneIdx={hlZoneIdx}

@@ -76,14 +76,6 @@ export default function CalendarPanel() {
     return m;
   }, [deployments]);
 
-  useEffect(() => {
-    const requestedGameDate = searchParams.get('gameDate');
-    if (!requestedGameDate) return;
-    if (gameMap[requestedGameDate]) {
-      setSelGame(gameMap[requestedGameDate]);
-    }
-  }, [gameMap, searchParams]);
-
   const shiftMonth = (d) => {
     let newMonth = curMonth + d;
     let newYear = curYear;

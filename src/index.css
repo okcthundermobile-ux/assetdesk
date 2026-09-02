@@ -3156,6 +3156,45 @@ header {
    font-size: 32px
 }
 
+.game-report-grid {
+   display: grid;
+   grid-template-columns: minmax(0, 1.8fr) minmax(300px, .8fr);
+   gap: 20px;
+   align-items: start
+}
+
+.game-report-grid .day-metric-grid {
+   grid-template-columns: repeat(2, minmax(0, 1fr))
+}
+
+.game-report-insights {
+   display: flex;
+   flex-direction: column;
+   gap: 16px
+}
+
+.game-deployment-list {
+   padding: 4px 14px 14px
+}
+
+.game-deployment-item {
+   display: flex;
+   flex-direction: column;
+   gap: 2px;
+   padding: 10px 0;
+   border-bottom: 1px solid var(--border);
+   font-size: 12px
+}
+
+.game-deployment-item:last-child {
+   border-bottom: none
+}
+
+.game-deployment-item span {
+   color: var(--muted);
+   font-size: 11px
+}
+
 .kpi-day-wrap .tbl-title {
    font-size: 13px
 }
@@ -3168,6 +3207,10 @@ header {
 @media (max-width: 1200px) {
    .day-metric-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr))
+   }
+
+   .game-report-grid {
+      grid-template-columns: 1fr
    }
 }
 

@@ -168,11 +168,11 @@ export default function AppShell() {
     navigate(`/reports?${next.toString()}`);
   };
 
-  const setReportGameDate = (gameDate) => {
+  const setActiveGameDate = (gameDate) => {
     const next = new URLSearchParams(location.search);
     next.set('gameDate', gameDate);
-    next.set('reportType', 'game');
-    navigate(`/reports?${next.toString()}`);
+    if (location.pathname === '/reports') next.set('reportType', 'game');
+    navigate(`${location.pathname}?${next.toString()}`);
   };
 
   return (
@@ -228,12 +228,12 @@ export default function AppShell() {
                 </button>
               </div>
             )}
-            {location.pathname === '/reports' && reportType === 'game' && (
+            {(location.pathname === '/arena' || (location.pathname === '/reports' && reportType === 'game')) && (
               <GameDatePicker
                 games={games}
                 value={new URLSearchParams(location.search).get('gameDate') || new Date().toISOString().slice(0, 10)}
-                onChange={setReportGameDate}
-                label="Game report date"
+                onChange={setActiveGameDate}
+                label={location.pathname === '/arena' ? 'Map game date' : 'Game report date'}
               />
             )}
           </div>

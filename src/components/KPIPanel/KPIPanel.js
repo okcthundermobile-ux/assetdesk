@@ -158,85 +158,91 @@ export default function KPIPanel() {
               ? `${linkedGameDate} · vs. ${selectedGame.opp} · ${dayRows.length} active partner${dayRows.length === 1 ? '' : 's'}`
               : `${linkedGameDate || 'No game selected'} · No scheduled game data`}
           </div>
+          <div className="game-report-grid">
+            <div>
+              <div className="metric-grid day-metric-grid">
+                <div className="m-card day-metric-card">
+                  <div className="m-lbl">Active Partners</div>
+                  <div className="m-val">{dayRows.length}</div>
+                  <div className="m-sub">Scheduled for this game date</div>
+                </div>
+                <div className="m-card day-metric-card">
+                  <div className="m-lbl">Total QI Media Value</div>
+                  <div className="m-val">{fmt$(dayTotals.qi)}</div>
+                  <div className="m-sub">Across all active partners</div>
+                </div>
+                <div className="m-card day-metric-card">
+                  <div className="m-lbl">Total Impressions</div>
+                  <div className="m-val">{fmtN(dayTotals.imp)}</div>
+                  <div className="m-sub">Estimated in-bowl + digital reach</div>
+                </div>
+                <div className="m-card day-metric-card">
+                  <div className="m-lbl">Average CTR</div>
+                  <div className="m-val">{dayTotals.avgCtr.toFixed(2)}%</div>
+                  <div className="m-sub">Mean partner CTR for this date</div>
+                </div>
+              </div>
 
-          <div className="metric-grid day-metric-grid">
-            <div className="m-card day-metric-card">
-              <div className="m-lbl">Active Partners</div>
-              <div className="m-val">{dayRows.length}</div>
-              <div className="m-sub">Scheduled for this game date</div>
+              <div className="tbl-box">
+                <div className="tbl-head"><div className="tbl-title">Per-Partner Game KPIs</div></div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Partner</th><th>Asset</th><th>QI Value</th><th>Impressions</th><th>CTR</th><th>Engagements</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dayRows.length === 0 ? (
+                      <tr><td colSpan={6} style={{ color: 'var(--muted)' }}>No active partners for this date.</td></tr>
+                    ) : (
+                      dayRows.map(({ partner: rowPartner, kpi: rowKpi }) => (
+                        <tr key={rowPartner.id}>
+                          <td><strong>{rowPartner.name}</strong></td>
+                          <td style={{ color: 'var(--muted)' }}>{rowPartner.asset}</td>
+                          <td><strong>{fmt$(rowKpi.qi)}</strong></td>
+                          <td>{fmtN(rowKpi.imp)}</td>
+                          <td>{rowKpi.ctr}%</td>
+                          <td>{fmtN(rowKpi.eng)}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <div className="m-card day-metric-card">
-              <div className="m-lbl">Total QI Media Value</div>
-              <div className="m-val">{fmt$(dayTotals.qi)}</div>
-              <div className="m-sub">Across all active partners</div>
-            </div>
-            <div className="m-card day-metric-card">
-              <div className="m-lbl">Total Impressions</div>
-              <div className="m-val">{fmtN(dayTotals.imp)}</div>
-              <div className="m-sub">Estimated in-bowl + digital reach</div>
-            </div>
-            <div className="m-card day-metric-card">
-              <div className="m-lbl">Average CTR</div>
-              <div className="m-val">{dayTotals.avgCtr.toFixed(2)}%</div>
-              <div className="m-sub">Mean partner CTR for this date</div>
-            </div>
-          </div>
 
-          <div className="tbl-box" style={{ marginBottom: 16 }}>
-            <div className="tbl-head"><div className="tbl-title">Per-Partner Game KPIs</div></div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Partner</th><th>Asset</th><th>QI Value</th><th>Impressions</th><th>CTR</th><th>Engagements</th>
-                </tr>
-              </thead>
-              <tbody>
+            <aside className="game-report-insights">
+              <div className="chart-box">
+                <div className="chart-title">QI Media Value by Partner</div>
                 {dayRows.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} style={{ color: 'var(--muted)' }}>No active partners for this date.</td>
-                  </tr>
+                  <div className="m-sub">No partner activity for this date.</div>
                 ) : (
                   dayRows.map(({ partner: rowPartner, kpi: rowKpi }) => (
-                    <tr key={rowPartner.id}>
-                      <td><strong>{rowPartner.name}</strong></td>
-                      <td style={{ color: 'var(--muted)' }}>{rowPartner.asset}</td>
-                      <td><strong>{fmt$(rowKpi.qi)}</strong></td>
-                      <td>{fmtN(rowKpi.imp)}</td>
-                      <td>{rowKpi.ctr}%</td>
-                      <td>{fmtN(rowKpi.eng)}</td>
-                    </tr>
+                    <div key={rowPartner.id} className="bar-row">
+                      <div className="bar-lbl">{rowPartner.short}</div>
+                      <div className="bar-track"><div className="bar-fill" style={{ width: `${dayTotals.qi ? Math.round((rowKpi.qi / dayTotals.qi) * 100) : 0}%`, background: rowPartner.color }} /></div>
+                      <div className="bar-val">{fmt$(rowKpi.qi)}</div>
+                    </div>
                   ))
                 )}
-              </tbody>
-            </table>
-          </div>
+              </div>
 
-          <div className="tbl-box">
-            <div className="tbl-head"><div className="tbl-title">Scheduled Deployments on {linkedGameDate || 'Selected Date'}</div></div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Type</th><th>Name</th><th>Partner(s)</th><th>Status</th><th>Owner</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dayDeployments.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} style={{ color: 'var(--muted)' }}>No deployments found for this date.</td>
-                  </tr>
-                ) : (
-                  dayDeployments.map((d) => (
-                    <tr key={d.id ?? `${d.Asset_Name}-${d.Partner_ID}-${d.Game_Date}`}>
-                      <td>{d.deploymentType === 'campaign' ? 'Campaign' : 'Asset'}</td>
-                      <td><strong>{d.Asset_Name}</strong></td>
-                      <td>{Array.isArray(d.partnerNames) && d.partnerNames.length > 0 ? d.partnerNames.join(', ') : d.partnerName || d.Partner_ID}</td>
-                      <td>{d.status || 'Scheduled'}</td>
-                      <td>{d.owner || 'Unassigned'}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+              <div className="tbl-box">
+                <div className="tbl-head"><div className="tbl-title">Scheduled Deployments</div></div>
+                <div className="game-deployment-list">
+                  {dayDeployments.length === 0 ? (
+                    <div className="m-sub">No deployments found for this game.</div>
+                  ) : (
+                    dayDeployments.map((d) => (
+                      <div key={d.id ?? `${d.Asset_Name}-${d.Partner_ID}-${d.Game_Date}`} className="game-deployment-item">
+                        <strong>{d.Asset_Name}</strong>
+                        <span>{d.deploymentType === 'campaign' ? 'Campaign' : 'Asset'} · {d.status || 'Scheduled'}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </aside>
           </div>
         </div>
       )}
