@@ -81,7 +81,7 @@ export default function ArenaMap({ partners, hlZoneIdx, onSelectZone, onHover, q
     || marker.label.toLowerCase().includes(q);
 
   return (
-    <div className="arena-map">
+    <div className="arena-map" onMouseLeave={() => onHover(null, -1)}>
       <img
         src="/paycom-center-map.png"
         alt="Paycom Center seating chart"

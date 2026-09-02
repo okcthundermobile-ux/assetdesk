@@ -29,7 +29,6 @@ export default function HeatmapPanel() {
   const [tipData, setTipData] = useState(null);
   const [query, setQuery] = useState('');
   const [linkedGameDate, setLinkedGameDate] = useState(searchParams.get('gameDate') || TODAY_ISO);
-  const [showAllDeployments, setShowAllDeployments] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -88,7 +87,9 @@ export default function HeatmapPanel() {
   };
 
   const handleZoneMove = (e) => {
-    if (tipData) {
+    if (!e.target.closest('.arena-marker')) {
+      setTipData(null);
+    } else if (tipData) {
       setTipData({
         ...tipData,
         x: e.clientX + 12,
@@ -108,10 +109,8 @@ export default function HeatmapPanel() {
   };
 
   const shownDeployments = useMemo(() => {
-    const assetDeployments = deployments.filter(d => d.deploymentType !== 'campaign');
-    if (showAllDeployments) return assetDeployments;
-    return assetDeployments.filter(d => d.Game_Date === linkedGameDate);
-  }, [deployments, linkedGameDate, showAllDeployments]);
+    return deployments.filter(d => d.Game_Date === linkedGameDate);
+  }, [deployments, linkedGameDate]);
 
   if (partners.length === 0) return <div>Loading...</div>;
 
@@ -132,14 +131,6 @@ export default function HeatmapPanel() {
               />
               <span className="panel-search-icon" aria-hidden="true">🔍</span>
             </div>
-            <label className="deploy-partner-option" style={{ marginBottom: 0 }}>
-              <input
-                type="checkbox"
-                checked={showAllDeployments}
-                onChange={(e) => setShowAllDeployments(e.target.checked)}
-              />
-              <span>All asset deployments (all dates)</span>
-            </label>
           </div>
           <ArenaMap
             partners={partners}
@@ -152,7 +143,7 @@ export default function HeatmapPanel() {
           <div className="tbl-box" style={{ marginTop: 14 }}>
             <div className="tbl-head">
               <div className="tbl-title">
-                {showAllDeployments ? `All Asset Deployments Across All Dates (${shownDeployments.length})` : `Asset Deployments on ${linkedGameDate} (${shownDeployments.length})`}
+                {`All Deployments on ${linkedGameDate} (${shownDeployments.length})`}
               </div>
             </div>
             <table>
