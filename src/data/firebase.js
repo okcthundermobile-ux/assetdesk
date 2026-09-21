@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 import { getFirestore, collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc} from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { PARTNERS, KPI, GAMES } from './mockData';
+import { PARTNERS, KPI, GAMES, BOLT_APPEARANCES, BOLT_SEASON_SUMMARY, COMMUNITY_EVENTS } from './mockData';
 
 const LOCAL_PARTNERS_KEY = 'thunder-local-partners';
 
@@ -187,6 +187,36 @@ export const getAssets = async () => {
 };
 
 /**
+ * Fetches all Bolt Appearances.
+ * @returns {Promise<Array>}
+ */
+export const getBoltAppearances = async () => {
+  if (!db) return BOLT_APPEARANCES;
+  const snap = await getDocs(collection(db, 'boltAppearances'));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+};
+
+/**
+ * Fetches the Bolt Season Summary.
+ * @returns {Promise<Array>}
+ */
+export const getBoltSeasonSummaries = async () => {
+  if (!db) return BOLT_SEASON_SUMMARY;
+  const snap = await getDocs(collection(db, 'boltSeasonSummaries'));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+};
+
+/**
+ * Fetches all Community Events.
+ * @returns {Promise<Array>}
+ */
+export const getCommunityEvents = async () => {
+  if (!db) return COMMUNITY_EVENTS;
+  const snap = await getDocs(collection(db, 'communityEvents'));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+};
+
+/**
  * Fetches a user's profile document from the 'users' collection.
  * @param {string} uid  Firebase Auth UID
  * @returns {Promise<Object|null>}
@@ -359,6 +389,10 @@ export const addAsset = async (asset) => {
  * Can be run without creating duplicates via setDoc
  */
 export const seedDatabase = async () => {
+  if (!db) {
+    console.error('Firebase is not configured. Please ensure your .env file is set up correctly (see README) before running seedDatabase().');
+    return;
+  }
   console.group('Thunder Innovations Seeding Firestore');
 
   // Partners
@@ -378,6 +412,24 @@ export const seedDatabase = async () => {
     await setDoc(doc(db, 'games', game.d), game);
   }
   console.log(`Games seeded (${GAMES.length} docs)`);
+
+  // Bolt Appearances
+  for (const appearance of BOLT_APPEARANCES) {
+    await setDoc(doc(db, 'boltAppearances', String(appearance.id)), appearance);
+  }
+  console.log(`Bolt Appearances seeded (${BOLT_APPEARANCES.length} docs)`);
+
+  // Bolt Season Summaries
+  for (const summary of BOLT_SEASON_SUMMARY) {
+    await setDoc(doc(db, 'boltSeasonSummaries', String(summary.id)), summary);
+  }
+  console.log(`Bolt Season Summaries seeded (${BOLT_SEASON_SUMMARY.length} docs)`);
+
+  // Community Events
+  for (const event of COMMUNITY_EVENTS) {
+    await setDoc(doc(db, 'communityEvents', String(event.id)), event);
+  }
+  console.log(`Community Events seeded (${COMMUNITY_EVENTS.length} docs)`);
 
   console.log('Seeding complete!');
   console.groupEnd();

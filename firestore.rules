@@ -60,6 +60,21 @@ service cloud.firestore {
       allow write: if isStaffEditor();
     }
 
+    match /communityEvents/{documentID} {
+      allow read: if signedIn();
+      allow write: if isStaffEditor();
+    }
+
+    match /boltAppearances/{documentID} {
+      allow read: if signedIn();
+      allow write: if isStaffEditor();
+    }
+
+    match /boltSeasonSummaries/{documentID} {
+      allow read: if signedIn();
+      allow write: if isStaffEditor();
+    }
+
     match /activations/{activationID} {
       allow read: if signedIn();
       allow create: if isStaffEditor() || ownsPartner(request.resource.data.Partner_ID);

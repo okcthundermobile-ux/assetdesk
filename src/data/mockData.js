@@ -71,3 +71,54 @@ export const GAMES = [
   {d:'2026-04-08',opp:'Denver Nuggets',           ps:[0,2,3,5,6]},
   {d:'2026-04-12',opp:'Utah Jazz',                ps:[1,2,3,4,5]},
 ];
+
+export const BOLT_APPEARANCES = [
+  { id: 1, eventId: 201, communityOrZip: '73102 - Downtown OKC', hoursInCommunity: 3.5, milesTraveled: 12.4, fansEngaged: 420, boltETW: 1850.0 },
+  { id: 2, eventId: 202, communityOrZip: '73118 - The Village', hoursInCommunity: 2.0, milesTraveled: 8.1, fansEngaged: 275, boltETW: 980.0 },
+  { id: 3, eventId: 203, communityOrZip: '73013 - Edmond', hoursInCommunity: 4.0, milesTraveled: 22.7, fansEngaged: 610, boltETW: 2450.0 },
+  { id: 4, eventId: 204, communityOrZip: '73120 - Nichols Hills', hoursInCommunity: 1.5, milesTraveled: 6.3, fansEngaged: 190, boltETW: 720.0 },
+  { id: 5, eventId: 205, communityOrZip: '73034 - Guthrie', hoursInCommunity: 3.0, milesTraveled: 35.2, fansEngaged: 340, boltETW: 1320.0 }
+];
+
+export const BOLT_SEASON_SUMMARY = [
+  { id: 1, season: '2024-25', totalEvents: 47, uniqueCommunities: 31, totalHoursInCommunity: 128.5, totalMilesTraveled: 612.8, totalFansEngaged: 14850 }
+];
+
+export const COMMUNITY_EVENTS = [
+  // 1. Book Bus Visits
+  { id: 101, type: 'Book Bus Visit', metrics: { students_served: 185, books_distributed: 320, schools_served: 4, reading_minutes: 540, volunteers_engaged: 12 } },
+  { id: 102, type: 'Book Bus Visit', metrics: { students_served: 240, books_distributed: 410, schools_served: 6, reading_minutes: 720, volunteers_engaged: 18 } },
+  // 2. Fan Fest
+  { id: 103, type: 'Fan Fest', metrics: { total_attendance: 12500, fan_interactions: 3400, activity_participations: 1850, digital_engagements: 920, merchandise_giveaways: 1500 } },
+  { id: 104, type: 'Fan Fest', metrics: { total_attendance: 9800, fan_interactions: 2750, activity_participations: 1420, digital_engagements: 780, merchandise_giveaways: 1100 } },
+  // 3. Thunder Up Tour
+  { id: 105, type: 'Thunder Up Tour', metrics: { tour_stops: 8, fans_reached: 4200, communities_visited: 7, miles_traveled: 186.5, digital_engagements: 640 } },
+  { id: 106, type: 'Thunder Up Tour', metrics: { tour_stops: 5, fans_reached: 2750, communities_visited: 5, miles_traveled: 112.3, digital_engagements: 410 } },
+  // 4. Thunder Up in the Park
+  { id: 107, type: 'Thunder Up in the Park', metrics: { park_attendance: 1850, youth_participants: 420, basketball_participants: 180, fan_interactions: 650, giveaways_distributed: 800 } },
+  { id: 108, type: 'Thunder Up in the Park', metrics: { park_attendance: 2100, youth_participants: 510, basketball_participants: 220, fan_interactions: 780, giveaways_distributed: 950 } },
+  // 5. Thunder Youth Basketball Camps
+  { id: 109, type: 'Youth Basketball Camp', metrics: { campers_registered: 95, campers_attended: 88, instruction_hours: 42.5, coaches_involved: 12, scholarships_awarded: 18 } },
+  { id: 110, type: 'Youth Basketball Camp', metrics: { campers_registered: 120, campers_attended: 112, instruction_hours: 56.0, coaches_involved: 15, scholarships_awarded: 25 } },
+  // 6. Math Hoops
+  { id: 111, type: 'Math Hoops', metrics: { students_participating: 680, schools_participating: 14, classrooms_participating: 32, educators_engaged: 28, program_hours: 48.0 } },
+  { id: 112, type: 'Math Hoops', metrics: { students_participating: 520, schools_participating: 11, classrooms_participating: 25, educators_engaged: 22, program_hours: 36.5 } },
+  // 7. Thunder Night at the Drillers
+  { id: 113, type: 'Drillers Night', metrics: { event_attendance: 6200, thunder_activation_visits: 1450, giveaways_distributed: 900, digital_engagements: 520, mascot_interactions: 380 } },
+  { id: 114, type: 'Drillers Night', metrics: { event_attendance: 5800, thunder_activation_visits: 1320, giveaways_distributed: 850, digital_engagements: 480, mascot_interactions: 340 } },
+  // 8. Thunder Cares Holiday Assist
+  { id: 115, type: 'Holiday Assist', metrics: { families_served: 320, children_served: 580, gifts_distributed: 950, volunteers_engaged: 85, volunteer_hours: 320.5 } },
+  { id: 116, type: 'Holiday Assist', metrics: { families_served: 410, children_served: 740, gifts_distributed: 1250, volunteers_engaged: 110, volunteer_hours: 412.0 } },
+  // 9. Recess with Rumble
+  { id: 117, type: 'Recess with Rumble', metrics: { students_participating: 340, schools_visited: 5, activity_minutes: 480, student_interactions: 290, giveaways_distributed: 420 } },
+  { id: 118, type: 'Recess with Rumble', metrics: { students_participating: 275, schools_visited: 4, activity_minutes: 360, student_interactions: 230, giveaways_distributed: 350 } },
+  // 10. deadCenter Film Festival
+  { id: 119, type: 'deadCenter Film Festival', metrics: { festival_attendance: 4800, thunder_activation_visits: 620, screenings_supported: 8, digital_engagements: 410, community_partners_engaged: 12 } },
+  { id: 120, type: 'deadCenter Film Festival', metrics: { festival_attendance: 5200, thunder_activation_visits: 710, screenings_supported: 9, digital_engagements: 480, community_partners_engaged: 15 } },
+  // 11. Hoops of Fortune
+  { id: 121, type: 'Hoops of Fortune', metrics: { participants: 850, games_played: 2100, prizes_awarded: 320, digital_engagements: 680, spectator_reach: 4200 } },
+  { id: 122, type: 'Hoops of Fortune', metrics: { participants: 920, games_played: 2450, prizes_awarded: 380, digital_engagements: 750, spectator_reach: 4800 } },
+  // 12. Women in Business Summit
+  { id: 123, type: 'Women in Business Summit', metrics: { attendees: 380, organizations_represented: 95, speakers: 18, sessions_delivered: 12, networking_engagements: 520 } },
+  { id: 124, type: 'Women in Business Summit', metrics: { attendees: 420, organizations_represented: 110, speakers: 22, sessions_delivered: 14, networking_engagements: 610 } }
+];
