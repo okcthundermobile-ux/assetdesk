@@ -30,7 +30,7 @@ const requiredEnvKeys = [
 ];
 
 const firebaseConfig = Object.fromEntries(
-  requiredEnvKeys.map((key) => [key.replace('REACT_APP_', '').replace(/_([a-z])/g, (_, ch) => ch.toUpperCase()), process.env[key]])
+  requiredEnvKeys.map((key) => [key.replace('REACT_APP_', '').toLowerCase().replace(/_([a-z])/g, (_, ch) => ch.toUpperCase()), process.env[key]])
 );
 
 const isFirebaseConfigured = requiredEnvKeys.every((key) => Boolean(process.env[key]));
